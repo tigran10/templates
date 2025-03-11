@@ -1,0 +1,30 @@
+# 🛠 Engineering Weekly - 2025-03-11
+
+## ✅ Pre-Meeting Updates
+*(Tech leads fill this section before the meeting)*
+
+### @tech-lead-1
+- Update 1: Completed PR #123 for CI pipeline improvements.
+- Update 2: Blocked on API rate limits—waiting for backend team.
+
+### @tech-lead-2
+- Update 1: Observability dashboards now include service health metrics.
+- Update 2: Need help troubleshooting network latency in production.
+
+---
+
+## 🗣 Discussion Topics
+*(Live notes taken during the meeting)*
+
+1. **CI/CD improvements** → Reduce test execution time.
+2. **New Feature Release Strategy** → Blue-green deployment considerations.
+3. **Engineering Hiring** → Need to fill 2 open roles.
+
+---
+
+## 🎯 Action Items
+*(Convert these into GitHub Issues during/after the meeting)*
+
+- [ ] Investigate test execution time reduction **(@tech-lead-1)** → Issue #45
+- [ ] Draft proposal for blue-green deployments **(@tech-lead-2)** → Issue #46
+- [ ] Open hiring ticket for two roles **(@tech-lead-3)** → Issue #47
