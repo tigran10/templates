@@ -1,0 +1,42 @@
+name: Engineering Weekly Action Item
+description: Track an action item from our weekly meeting
+title: "[Action]: <Brief title of the action item>"
+labels: ["engineering-weekly", "action-item"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: "## 🎯 Action Item Summary"
+  - type: textarea
+    id: context
+    attributes:
+      label: "📌 Context"
+      description: "Describe the background of this action item and why it's needed."
+      placeholder: "E.g., We need to improve CI pipeline efficiency because..."
+  - type: textarea
+    id: action
+    attributes:
+      label: "🛠 Action Plan"
+      description: "Outline the steps required to complete this action item."
+      placeholder: "- Investigate test caching\n- Reduce redundant builds\n- Automate performance tracking"
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "🚀 Priority"
+      description: "How urgent is this action item?"
+      options:
+        - "High 🔥"
+        - "Medium ⚡"
+        - "Low 💤"
+  - type: input
+    id: due-date
+    attributes:
+      label: "📅 Due Date"
+      description: "Target date for completion"
+      placeholder: "YYYY-MM-DD"
+  - type: textarea
+    id: blockers
+    attributes:
+      label: "⚠️ Potential Blockers"
+      description: "Any dependencies or risks?"
+      placeholder: "E.g., waiting for infra team, limited access to logs"
