@@ -275,20 +275,10 @@ You just witnessed a simple logo from Bob — who does not talk technology — p
 
 Remember the quote: **"that’s what we have done in my previous job"**.
 
-And believe me — most of the time, that’s exactly what Bob did.
-
-And he will do it again.
-
 Our approach is:
 **"that’s what we have done in our previous work, and that’s exactly why we will NOT do it again"**
 
-We actually have done it.
-
-And yes, maybe we contributed to those tools in open source, maybe we even contributed to books about how to put these things together.
-
-And honestly, those tools are amazing.
-
-But:
+Because: 
 - Context matters
 - Skills matter
 - Experience matters
@@ -297,9 +287,7 @@ Many things actually matter.
 
 There is always more than one way of doing the same thing and engineering.
 
-And sometimes, even if you know exactly what you are doing — it’s **not** the reason to do it.
-
-And **can** be the reason to **NOT** do it.
+And sometimes, even if you know exactly what you are doing — it’s **not** the reason to do it. And **can** be the reason to **NOT** do it.
 
 We belong to the latter.
 
