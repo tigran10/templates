@@ -11,7 +11,7 @@
 		- [Instrument Metrics](#instrument-metrics)
 		- [Data Format](#data-format)
 	- [Logo Chaos](#logo-chaos)	
-		- [Logs aren't solutions](#logs-arent-solutions)     
+		- [Logs aren't solutions](#logos-arent-solutions)     
 		- [Elasticsearch](#elasticsearch)
 		- [Kibana](#kibana)
 		- [Prometheus](#prometheus) 
@@ -166,12 +166,9 @@ OpenTelemetry is the de facto agreed format, so you can move between solutions i
 ---
 ### Logo Chaos
 
-Logo Chaos
-
 It usually starts with a slide — full of logos. Prometheus. Elasticsearch. Kibana. Grafana. OpenTelemetry. All lined up neatly with arrows, looking like a solution.
 
-#### Logs aren't solutions
-But logos aren’t solutions.
+#### Logos aren't solutions
 
 Every tool on that slide comes with assumptions — about scale, uptime, deployment models, HA, observability pipelines, and operational ownership. What seems like an easy “stack” is often a set of distributed systems that need to be engineered, maintained, secured, and evolved.
 
