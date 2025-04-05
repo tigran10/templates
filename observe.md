@@ -6,12 +6,26 @@
 - [Complexity](#complexity)
 - [Tools vs Solutions](#tools-vs-solutions)
 - [Dashboards, Instrumentation, Logging, Databases, Alerts](#dashboards-instrumentation-logging-databases-alerts)
-  - [Instrumentation](#instrumentation)
-    - [Instrument Logs](#instrument-logs)
-    - [Instrument Metrics](#instrument-metrics)
-    - [Data Format](#data-format)
-    - [Logo Chaos](#logo-chaos)
-  - [Why We Did What We Did](#why-we-did-what-we-did)
+	- [Instrumentation](#instrumentation)
+		- [Instrument Logs](#instrument-logs)
+		- [Instrument Metrics](#instrument-metrics)
+		- [Data Format](#data-format)
+	- [Logo Chaos](#logo-chaos)	
+		- [Logs aren't solutions](#logs-arent-solutions)     
+		- [Elasticsearch](#elasticsearch)
+		- [Kibana](#kibana)
+		- [Prometheus](#prometheus) 
+		- [Alerts](#alerts) 
+		- [Grafana](#grafana) 
+		- [Open telemetry](#opentelemetry) 
+	- [Why We Did What We Did](#why-we-did-what-we-did)
+		- [Instrumentation](#instrumentation-1)     
+		- [Logs](#logs)         
+		- [Metrics](#metrics)
+		- [Dashboards](#dashboards) 
+		- [Alerts](#alerts-1) 
+	- [The Multi-Cloud Question](#the-multi-cloud-question)
+	- [Final Words](#final-words)
 
 ---
 
@@ -23,7 +37,7 @@ Surprisingly, we saw this being a weak point in engineering, and we think we kno
 
 Obviously if a developer is not putting the right amount of logs, or instrumentation, or engineering self-healing capabilities, those things cannot be injected from the side. It's not clear how that promise is being made — that someone else, who has zero context about your code, or access to the code, can support your code in production, hoping you have provided logging context, traceability, and observability. That's fundamentally wrong.
 
-Hence, another topic where we are very opinionated. If you write code, make sure it works in production. And if it does not for some reason, make sure you write a test to replicate the issue, and on top of that, observe and trace down the problem. 
+Hence, another topic where we are very opinionated. If you write code, make sure it works in production. And if it does not for some reason, make sure you write a test to replicate the issue, and on top of that, observe and trace down the problem.
 
 **You write it, you own it.**
 
@@ -37,7 +51,7 @@ If you have been there and done that, you can skip this section.
 
 ## Complexity
 
-When we write software, we want to make sure what we write is right. So we write tests. Then we package the software and start promoting it to production via some kind of a path to production. 
+When we write software, we want to make sure what we write is right. So we write tests. Then we package the software and start promoting it to production via some kind of a path to production.
 
 The closer it is to production, the less access you have to your software, and the more interest you are developing about the usage of the software at the same time. And that’s where things are becoming tricky.
 
@@ -45,7 +59,7 @@ You get more questions about real-life usage when the software is running in rea
 
 ### Like Engineering a Space Shuttle
 
-Almost like with engineering a space shuttle, the command center takes probably the same amount or more of engineering as the shuttle itself. But to add to the complexity, it’s different when you deploy to production because it suddenly assumes scale. 
+Almost like with engineering a space shuttle, the command center takes probably the same amount or more of engineering as the shuttle itself. But to add to the complexity, it’s different when you deploy to production because it suddenly assumes scale.
 
 And with scale comes the underlying design — how you scale your application. Usually, you run the copy of it to help the traffic. More traffic, more copies are running. Now those copies can be orchestrated by platforms like Kubernetes, or serverless instances, or your own engineered solution.
 
@@ -55,7 +69,7 @@ But logic is always the same: you make your software able to run as a single ins
 
 To add more complexity, now imagine we don’t have a concept of sticky sessions, so 10 different requests from the same user now land not on the same instance of your app but on 10 different instances of the application. Suddenly all our logs and metrics are now shredded. Not only do I need to collect and order them in one place, I also need to actually query and combine relevant logs together.
 
-If you think this was the complex example, you will be disappointed — as it's the easy part. Usually it's not just a request and response — it’s a request to some service that then connects to another service that then connects to something else. All those different services are scaled, so they all have different copies of themselves to cope with traffic. 
+If you think this was the complex example, you will be disappointed — as it's the easy part. Usually it's not just a request and response — it’s a request to some service that then connects to another service that then connects to something else. All those different services are scaled, so they all have different copies of themselves to cope with traffic.
 
 So now, all of them are logging total randomness unless you find a way to order them in a way that tells the correct story. That was about logging. Assuming we actually write logs.
 
@@ -71,13 +85,13 @@ We need lots of metrics coming from everywhere, that we can then group and make 
 
 Now, when you know why it’s complex, let’s talk tools.
 
-You might have heard from techie-jargon people: "Let’s use Prometheus", or "ELK stack", or "Datadog". And of course, all those tools can be useful.
+You might have heard from techie-jargon people: "Let’s use `Prometheus`", or `ELK stack`, or `Datadog`. And of course, all those tools can be useful.
 
 However, they will **not** be useful if you think it’s a matter of using the tool. As you will get very basic dashboards and UIs, with information inside that does not make any sense.
 
 In reality, all those tools assume extra engineering. In large corps, you will always meet lots of people talking tools as solutions. That’s exactly what we don’t want.
 
-We need to make sure problems are articulated as engineering problems. And solutions are engineered — not installed. Big difference there.
+We need to make sure problems are articulated as engineering problems. And solutions are engineered — not installed. **BIG** difference there.
 
 Now let’s go back to all these tools and see what they have in common.
 
@@ -152,258 +166,191 @@ OpenTelemetry is the de facto agreed format, so you can move between solutions i
 ---
 ### Logo Chaos
 
-Now let’s try to blend different tools together, and think about engineering solutions.
+Logo Chaos
 
-Imagine someone — let’s call him Bob — works as a "Head of Logos".
+It usually starts with a slide — full of logos. Prometheus. Elasticsearch. Kibana. Grafana. OpenTelemetry. All lined up neatly with arrows, looking like a solution.
 
-Bob's offer is below (and usually that person will say, "that’s what we have done in my previous job"):
+#### Logs aren't solutions
+But logos aren’t solutions.
 
-1. Elasticsearch for logs — it's great technology, super fast, amazing for logs. Read this blog.
-2. Kibana as a UI to query the crazy logs (remember how complex it can get) — Kibana is the de facto UI for Elasticsearch.
-3. Prometheus for metrics database — everyone is doing Prometheus, look at their website. It's really good.
-4. Grafana for better dashboards — I always thought Grafana is more than dashboards, I thought it's monitoring. But yes, doesn’t matter. Grafana, let’s use it.
-5. Alerts from Prometheus — you know Prometheus also supports alerts, look at their website.
-6. Let’s agree that we want OpenTelemetry, and mix in a few instrumentations from Prometheus and friends to get some data for free.
+Every tool on that slide comes with assumptions — about scale, uptime, deployment models, HA, observability pipelines, and operational ownership. What seems like an easy “stack” is often a set of distributed systems that need to be engineered, maintained, secured, and evolved.
 
-### Back to Reality
+Let’s look at what this really means.
 
-Congratulations — you just solved all problems, Bob. Arrows, logos, colors here and there, and landing pages. You found tools that say they do things really well, you put them together on slides and solved the problem.
+#### Elasticsearch
 
-Now let’s go back to reality and see what your slide actually means.
+You’re not just “using Elasticsearch.” You’re hosting and scaling a distributed log engine. Stateful storage. Index management. Query performance tuning. Backup and restore strategies. Retention policies.
 
-#### 1. Elasticsearch
+You’ll need to monitor it too. And probably scale it. And maybe worry about when it becomes your biggest production bottleneck.
 
-We need to host an Elasticsearch cluster. Yes, host it yourself. Make sure it works — always. Grows and scales without problems, as we will be pushing an insane amount of data. Unless you want to save on logs?
+#### Kibana
 
-So you need some scalable way to host it. Oh, let’s put Kubernetes on our slides — sounds cool.
+The UI looks simple — until you realise it needs SSO, role management, and manual dashboard creation. And that someone needs to understand its query language well enough to troubleshoot real production issues.
 
-By the way, have you ever managed a k8s cluster? Super easy — RBAC, secrets, segregation of namespaces and networks, liveness... of course, no problem with that.
+Dashboards don’t build themselves. And they don’t stay up-to-date either.
 
-Oh by the way, if we put k8s there, we might as well put a Helm chart repo, as of course we will be using Helm with k8s.
+#### Prometheus
 
-Have you done Helm release management? Insane amount of YAML files, crazy Dockerfiles and etc? Very easy and fun.
+It’s not just a “metrics database.” It’s a pull-based TSDB that needs to discover your services, scrape them, store data reliably, and expose it for queries.
 
-Also, how many people do you know that have done all of this before?
+Add high availability and remote write to the mix, and now you’re running something that expects engineering support. It drops data silently if overloaded. It grows rapidly. And it doesn’t work well out-of-the-box in federated setups.
 
-Now, when that one logo added a huge drama — people, new teams, expenses, and operations — to our life, let’s have a look at the other logos.
+#### Alerts
 
-But before we move — if we store logs in Elasticsearch, where do we store logs for Elasticsearch itself (aha, gotcha)?
+Once you figure out Prometheus alerting rules and build a few expressions, you’ll quickly notice: alerts don’t mean anything unless they’re routed properly. Slack, email, escalation. Who owns what. What’s noisy. What’s actionable.
 
-#### 2. Kibana
+This needs infrastructure around it — not just YAML.
 
-We assume it’s easy to configure and connect to our Elasticsearch. Maybe.
+#### Grafana
 
-Have you done it before?
+It’s flexible, powerful, and visual — but also configuration-heavy. Someone needs to hook up data sources, manage provisioning, sync state, and update dashboards as systems evolve.
 
-Now when it connects, maybe, just maybe, we also need to think:
-- Who can access it?
-- SSO?
-- Different roles?
-- We need to create lots of widgets that are helpful.
-- Who knows the query language?
+Otherwise you’ll end up with beautiful dashboards that are out-of-sync or abandoned after one use.
 
-GPT will help nowadays, but the rest is another operational-heavy logo.
+#### OpenTelemetry
 
-#### 3. Prometheus
-
-Remember — it’s a database, right?
-
-So, same as with Elasticsearch:
-- Where to host it?
-- Scalability?
-
-That’s when we find out that there is a different version of Prometheus that is semi-enterprise — it comes as a scalable instance.
-
-Super high maintenance, as with any manual operational storage that must scale forever.
-
-At this point we are spending a lot of money already — as it’s very likely nobody has done this before.
-
-#### 4. Alerts
-
-Let’s assume we now know how to deploy and configure Prometheus UI and alerting.
-
-It’s actually hard. But let’s assume the hard part is done.
-
-We have this nice UI — that is empty.
-
-We learn the query language, we put something in, we do illusion of alerts. And we find out, we actually need to engineer a solution to deliver these alerts — via email, text, and so on.
-
-Oh. We had not thought about it before.
-
-#### 5. Grafana
-
-Same story:
-- Crazy configurations to connect to different data sources.
-- Once done, you hope it works.
-
-However, remember — now **you** are hosting this tool.
-
-You put all these operation-heavy tools, each requiring lots of knowledge, just to get logs.
-
-Amazing.
-
-#### 6. OpenTelemetry
-
-This was easy — seems like it works.
-
-But we can’t test it — as everything else will be delivered in 5 years, after 3 transformation programs and many permutations of tools on slides.
-
-### Dessert: The Inevitable Spiral
-
-Imagine — just imagine — you have done all this. You found a way to automatically deploy everything and wire it together.
-
-Guess what? This is part of your software now.
-
-So you need to:
-- Test that your logs are working
-- Metrics are adequate
-- Alerts are working
-
-Ah — would that mean deploy and operate this in many environments to make sure it works?
-
-Aha. So all these crazy clusters now must run in many different environments. Have their own release schedules, upgrades. And people who are not bored to death doing this operation.
-
-At this point, we call it technical debt, and change jobs.
-
-Someone else’s problem.
-
-To be more precise — someone else’s **digital transformation** problem.
+The spec is solid. The libraries are evolving. The collector is flexible. But it’s not plug-and-play. You still need to decide what to instrument, how to sample, where to send the data, and how to manage the overhead. It shifts complexity — it doesn’t remove it.
 
 ---
 
-You just witnessed a simple logo from Bob — who does not talk technology — putting it on a slide and creating this chaos.
+All of these tools are great — in the right hands, with the right investment, and the right operational thinking behind them.
 
-Remember the quote: **"that’s what we have done in my previous job"**.
+But if you’re not thinking about how they behave under load, how you deploy them in non-prod environments, how you scale, recover, upgrade, isolate, and observe them — you’re just stacking infrastructure without a plan.
 
-Our approach is:
-**"that’s what we have done in our previous work, and that’s exactly why we will NOT do it again"**
+Logos don’t fail gracefully. Systems do.
 
-Because: 
-- Context matters
-- Skills matter
-- Experience matters
+So every time a tool gets picked, we ask:
+- Who runs it?
+- Who upgrades it?
+- Who owns incidents tied to it?
+- How is it tested in staging?
+- How do we decommission it?
 
-Many things actually matter.
+Because every tool has a cost — and it’s rarely just licensing. It’s people, time, and production pain.
 
-There is always more than one way of doing the same thing and engineering.
-
-And sometimes, even if you know exactly what you are doing — it’s **not** the reason to do it. And **can** be the reason to **NOT** do it.
-
-We belong to the latter.
+If you don’t plan for that, the logos on your slide will eventually become the reasons in your postmortem.
 
 ---
 
 ### Why We Did What We Did
 
-Now you might be interested: what have we done?
+Why We Did What We Did
 
-Good question. We prioritised the usual suspects — what matters to us the most.
+Now you might be wondering — what did we actually do?
 
-#### 1. Instrumentation
+Good question. We focused on what matters most. Not tools. Not slides. Just the outcomes we care about — and the engineering needed to get them.
 
-We picked **OpenTelemetry and friends** to instrument all our code and logs. 
+#### Instrumentation
 
-Pretty agnostic of toolchain — the data can be saved in any telemetry-friendly storage.
+We chose OpenTelemetry and friends to instrument our code and logs.
 
-#### 2. Logs
+Why? Because it’s:
+- Open standard
+- Cloud-agnostic
+- Actively evolving
+- Easy to plug into whatever backend we choose
 
-We got instrumented logs. We thought, OK, we need a place to save them.
+This gives us flexibility. We’re not locked into one vendor, one toolchain, or one opinionated pipeline. We can emit telemetry in a standard way and route it wherever we need — now or later.
 
-It’s JSON data — so relatively portable anyway.
+#### Logs
 
-We wanted to save, and forget about them.
+We instrument our logs — meaning they’re structured, correlated, and consistent.
 
-**GCP Logging backend is delivering the promise.**
+We ship them as JSON. Portable, queryable, easy to work with.
 
-Can you push logs somewhere else? Yes — if you really need to. It’s JSON. Good luck though.
+Where do they go? GCP’s logging backend.
 
-We just saved **millions of operational craziness** with this one.
+No servers to manage. No storage limits to juggle. No log rotation scripts. It just works — and integrates into the rest of the platform natively.
 
-#### 3. Metrics
+Can we route logs elsewhere? Yes. But why complicate things before we need to?
 
-Instrumented metrics are now flying around. Same here — save and forget.
+We saved ourselves a mountain of operational overhead by not self-hosting a log platform.
 
-No scalability issue. No upgrades. No maintenance windows. No tickets. No emails.
+#### Metrics
 
-It just works.
+Same philosophy here.
 
-**GCP Metrics backend**, telemetry-friendly. 
+Telemetry is emitted. Backend takes care of ingestion, storage, retention, and querying.
 
-We just saved a few millions again.
+GCP Metrics backend handles scale, cost control, and alerting. It’s optimized for the cloud it runs on. And we don’t need to reinvent time-series infrastructure.
 
-#### 4. Dashboards
+So instead of worrying about Prometheus internals, we’re focused on emitting meaningful signals from our apps.
 
-By now, we already sold our soul to GCP — so you won’t be surprised to hear about dashboards in Google.
+#### Dashboards
 
-Is it cool? Absolutely.
+We use `GCP’s` built-in dashboards.
+
+Are they perfect? No. Are they enough? Yes — and more.
 
 Because:
-- First — it works.
-- Second — you get whole **GCP RBAC control** on users for free.
-- Zero maintenance.
-- Lots of widgets.
-- Surprise — **Terraform**: so you can have dashboards as code.
+- They work
+- They’re tied to `IAM` (`RBAC` is built-in)
+- They support Terraform (dashboards-as-code)
+- They don’t require a separate platform to host and maintain
 
-#### 5. Alerts
+That’s a huge win in terms of ownership. Less glue code. Fewer things to break.
 
-**GCP Alerts.** From emails to text messages, rules, escalations — all as code.
+#### Alerts
 
-#### How Long Did It Take?
+GCP Alerting closes the loop.
 
-Couple of weeks.
+We write alerting policies as code, version them, roll them out per environment, and route them to the right destinations.
 
-We created a **library**, that comes as a dependency, with most things configured — so you save time on glue code.
+Email, SMS, Slack, PagerDuty — whatever the workflow is, the platform supports it.
 
-You mix it into your Spring-like project, you get pretty much everything out.
-
-You learn how to use Terraform, and each time you install your software in GCP, it comes with:
-- Its own dashboards
-- Its own alerts
-- Its own logs
-
-**As one package.**
-
-You build it — you own it.
+Again, no extra infra to manage. No sidecar projects. No duct tape.
 
 ---
 
-### The Bob Reaction
+### The Multi-Cloud Question
 
-At this point, Bob sends unhappy emails:
 
-> "Yes, but we don’t want to be locked to the cloud implementation. We want to be multi-cloud..."
+At some point, someone always asks:
 
-And he adds a few other jargon-y words there.
+	“Aren’t we locking ourselves into a single cloud provider? What about multi-cloud?”
 
-Our answer to Bob:
+It’s a fair question — and one we’ve already thought through.
 
-> Bob, it’s a good point. And of course, you’ve done it before. That’s exactly why we kept the data formats not opinionated, and portable.
->
-> Once multi-cloud works for everything apart from logging, we promise — we will also just forward logs to any other logo.
->
-> But for now, can we please please please focus on delivering **user value** and stop the logo conversation?
->
-> Also, if you need help with multi-cloud — let us know. We might be able to.
+The reason we chose this setup isn’t because we’re cloud-loyal. It’s because it works. It gets us observability without spending months building platforms or years maintaining them.
+
+What matters more to us is:
+- Standards-based telemetry (OpenTelemetry)
+- Structured, portable logs
+- Configurable alerting as code
+- Infrastructure we don’t have to babysit
+
+Everything we’re emitting — metrics, traces, logs — is cloud-agnostic. If we want to switch backends tomorrow, we can.
+
+And yes — logs could be routed elsewhere. But right now, they’re landing in a system that scales, integrates, and lets us focus on product instead of platform.
+
+If “multi-cloud” becomes a real requirement, not just a slide title — we’re ready.
+
+Until then, we’re shipping value. Not architecture diagrams.
 
 ---
 
 ### Final Words
 
-Story ends here.
+That’s the story.
 
-And we agree — many things come opinionated.
+And yes — much of this is opinionated. Intentionally so.
 
-That’s because we focus on delivering **value** to our users:
-- The engineers using our solutions
-- The Gupa customers using our digital products
+Because our focus is delivering real value:
+- To the engineers building and running our systems
+- To the Gupa customers using the products we ship
 
-We are pushing for value with every commit.
+Every decision we’ve made is in service of that.
 
-At the time of writing this README, there is no value in talking logos.
+We’re not here to talk logos, debate tools, or over-architect for slides. We’re here to build systems that:
+- Work out of the box
+- Scale without drama
+- Are observable from day one
+- Can be operated by teams, not specialists
 
-We engineer agnostic and solid solutions — everything:
-- Automated
-- Safe
-- Attractive to good engineers
-- Available quicker to Gupa customers
+We design for simplicity. We automate the boring parts. We make things safe, fast, and attractive for good engineers to own and evolve.
 
+And most importantly — we make them deliver faster.
+
+That’s where the value is.
+
+And that’s what we ship.
