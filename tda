@@ -1,0 +1,20 @@
+As part of the Genomics pilot, we’re introducing a dedicated Product Definition service — the first concrete implementation of a broader shift toward clearly owned domain services at Bupa. This service is responsible for defining product structure, eligibility rules, and holding logic, with its own schema and data ownership.
+
+Our aim is to establish a canonical product model that can support downstream use cases — booking journeys, eligibility flows, and other product-facing interactions — with a clean separation from internal system implementations.
+
+Why a Facade?
+
+One of the challenges with rolling out new services in our current architecture is adoption friction. MyBupa app integrations depend on tightly coupled aggregation layers, where multiple backend responses are composed into a single shape that’s already embedded in frontend logic.
+
+We’re not looking to break that contract immediately — instead, we’re introducing a backend facade layer that allows us to match the existing schema while routing parts of the response to our new service. This gives us several advantages:
+	•	Faster adoption: We avoid blocking on frontend changes. The app doesn’t need to integrate with our new APIs directly to get value from them.
+	•	Safe rollout: The facade gives us a clean interception point. We can route, enrich, and override responses incrementally.
+	•	Decoupling backend logic: Over time, we can break down the backend aggregation into clearer domain services, each exposing focused APIs with business-aligned language — like eligibility or product holding.
+
+Importantly, this also allows us to test and evolve the product definition schema behind the scenes without forcing tight coordination across teams.
+
+Rollout Strategy
+
+We’re managing this with feature flags. This isn’t a disaster recovery mechanism — it’s simply smart rollout. It gives us the flexibility to shift traffic gradually, validate responses, and fall back instantly if needed. It also ensures we stay accountable on latency and performance.
+
+This approach sets the foundation not just for Genomics, but for how we deliver new product capabilities going forward. We start by matching current expectations, reduce risk by integrating seamlessly, and gradually move toward clean, reusable, and owned APIs that can power future-facing digital products.
